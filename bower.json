@@ -1,0 +1,16 @@
+{
+  "name": "ruvain",
+  "version": "1.0.0",
+  "authors": [
+    "Julia Mitchelmore <julia@foundersfactory.co>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "vendor"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6"
+  }
+}
