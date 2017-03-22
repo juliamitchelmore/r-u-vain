@@ -118,7 +118,7 @@ module.exports = {
 	context: __dirname + '/src',
 	entry: isProduction ? productionEntry : developmentEntry,
 	output: {
-		path: __dirname + '/dest',
+		path: __dirname + '/dist',
 		filename: 'js/main.[hash].js',
 		publicPath: '/'
 	},
