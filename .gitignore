@@ -6,8 +6,6 @@
 /vendor/bower_components
 .DS_Store
 /README.md
-/src
-webpack.config.js
 package.json
 server.js
 circle.yml
