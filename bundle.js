@@ -37,7 +37,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = "b760aa364d5393c8ebe1";
+/******/ 	__webpack_require__.h = "17d5842f03cdcfa77c54";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -29833,14 +29833,23 @@
 	    });
 	}
 	
+	var mediaItems = [];
+	var ownLikes = 0;
+	
 	function fetchMedia(username) {
 	    //ONLY WORKS for authenticated users currently because of sandbox mode, and only for one page of results.
 	    return function (dispatch) {
 	        dispatch(requestMedia(username));
 	
 	        return invokeLambda("https://4y2p8124pb.execute-api.eu-west-1.amazonaws.com/prod/userdetails", { username: username }).then(function (userResponse) {
-	            return invokeLambda("https://4y2p8124pb.execute-api.eu-west-1.amazonaws.com/prod/uservanity", { id: userResponse.data[0].id }).then(function (response) {
-	                return dispatch(receiveMedia(response.ownLikes, response.totalItems, userResponse.data[0].username, userResponse.data[0].profile_picture));
+	            var userId = userResponse.data[0].id;
+	            return invokeLambda("https://4y2p8124pb.execute-api.eu-west-1.amazonaws.com/prod/uservanity", { id: userId }).then(function (response) {
+	                mediaItems = response.mediaItems;
+	                var totalItems = response.totalItems;
+	
+	                mediaLoop(mediaItems[0], 0, totalItems, userId).then(function () {
+	                    dispatch(receiveMedia(ownLikes, totalItems, userResponse.data[0].username, userResponse.data[0].profile_picture));
+	                });
 	            }).catch(function (error) {
 	                return dispatch(handleError());
 	            });
@@ -29848,6 +29857,22 @@
 	            return dispatch(handleError());
 	        });
 	    };
+	}
+	
+	function mediaLoop(mediaId, index, totalItems, userId) {
+	    var promise = new Promise(function (resolve, reject) {
+	        return invokeLambda("https://4y2p8124pb.execute-api.eu-west-1.amazonaws.com/prod/usermedialikes", { mediaId: mediaId, userId: userId }).then(function (response) {
+	            ownLikes += response.hasLiked ? 1 : 0;
+	            if (index + 1 < totalItems) {
+	                mediaLoop(mediaItems[index + 1], index + 1, totalItems, userId).then(function () {
+	                    return resolve();
+	                });
+	            } else {
+	                resolve({ result: ownLikes });
+	            }
+	        });
+	    });
+	    return promise;
 	}
 	
 	function resetResults() {
